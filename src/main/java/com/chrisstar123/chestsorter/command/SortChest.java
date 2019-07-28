@@ -11,6 +11,9 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.chrisstar123.chestsorter.pluginsupport.Factions;
+import com.chrisstar123.chestsorter.pluginsupport.LWC;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +35,16 @@ public class SortChest implements CommandExecutor {
         Block target = player.getTargetBlock(null, 5);
 
         if (target.getType() != Material.CHEST) {
+            return true;
+        }
+
+        // Check if player has Factions permissions to modify this chest
+        if (Factions.getEnabled() && !Factions.canModifyChest(player, target)) {
+            return true;
+        }
+
+        // Check if chest has a LWC lock that does not belong to current player
+        if (LWC.getEnabled() && !LWC.canModifyChest(player, target)) {
             return true;
         }
 
