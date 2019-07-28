@@ -3,7 +3,6 @@ package com.chrisstar123.chestsorter.command;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -116,7 +115,8 @@ public class SortChest implements CommandExecutor {
         for (int i = 1; i < items.length; i++) {
             int a = items[i].getType().ordinal();
             int b = items[i-1].getType().ordinal();
-            if (items[i].getType().ordinal() < items[i-1].getType().ordinal()) {
+
+            if (a < b) {
                 return false;
             }
         }
