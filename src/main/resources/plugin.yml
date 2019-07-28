@@ -2,7 +2,7 @@ name: ChestSorter
 version: 1.2
 author: chrisstar123
 main: com.chrisstar123.chestsorter.ChestSorter
-api-version: 1.13
+api-version: 1.14
 commands:
   SortChest:
     Description: Sorts the chest you're looking at.

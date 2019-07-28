@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class SortChest implements CommandExecutor {
 
@@ -42,7 +41,6 @@ public class SortChest implements CommandExecutor {
         Inventory chestInv = chest.getInventory();
         ItemStack[] items;
         if (chestInv instanceof DoubleChestInventory) {
-            Logger.getGlobal().info("Double chest");
             items = ((DoubleChestInventory) chestInv).getHolder().getInventory().getContents();
         } else {
             items = chestInv.getContents();
