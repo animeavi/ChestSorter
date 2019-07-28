@@ -26,7 +26,7 @@ public class SortChest implements CommandExecutor {
         }
         Player player = (Player) commandSender;
 
-        //Get block player is looking at
+        // Get block player is looking at
         HashSet<Material> filter = new HashSet<Material>();
         filter.add(Material.CHEST);
         Block target = player.getTargetBlock(null, 5);
@@ -35,7 +35,7 @@ public class SortChest implements CommandExecutor {
             return true;
         }
 
-        //Get chest contents
+        // Get chest contents
         Chest chest = (Chest) target.getState();
         Inventory chestInv = chest.getInventory();
         ItemStack[] items;
@@ -45,31 +45,30 @@ public class SortChest implements CommandExecutor {
             items = chestInv.getContents();
         }
 
-        //Filter out null itemstacks
+        // Filter out null itemstacks
         List<ItemStack> itemsList = new ArrayList<>(Arrays.asList(items));
         itemsList.removeAll(Collections.singleton(null));
         items = itemsList.toArray(new ItemStack[itemsList.size()]);
 
-        //Stack items together
+        // Stack items together
         items = stackItems(items);
 
-        //Sort items and put back in chest
+        // Sort items and put back in chest
         sortItems(items);
         items = removeAir(items);
 
         if (chestInv instanceof DoubleChestInventory) {
-            //Split list in parts no longer than 27
+            // Split list in parts no longer than 27
             ItemStack[] chestA = Arrays.copyOfRange(items, 0, 27);
-            ItemStack[] chestB = items.length > 26 ? Arrays.copyOfRange(items, 27, 54) : new ItemStack[]{};
+            ItemStack[] chestB = items.length > 26 ? Arrays.copyOfRange(items, 27, 54) : new ItemStack[] {};
 
             DoubleChestInventory dChest = (DoubleChestInventory) chestInv;
             dChest.getLeftSide().setContents(chestA);
             dChest.getRightSide().setContents(chestB);
         } else {
-            //just set the contents
+            // just set the contents
             chestInv.setContents(items);
         }
-
 
         return true;
     }
@@ -78,8 +77,8 @@ public class SortChest implements CommandExecutor {
         for (int i = 0; i < items.length; i++) {
             for (int j = 0; j < i; j++) {
                 if (items[i].isSimilar(items[j])) {
-                    //Stack the items and continue
-                    //items[i] is the item we're stacking onto items[j]
+                    // Stack the items and continue
+                    // items[i] is the item we're stacking onto items[j]
                     int maxStackSize = items[j].getMaxStackSize();
                     int total = items[j].getAmount() + items[i].getAmount();
                     if (total > maxStackSize) {
@@ -114,7 +113,7 @@ public class SortChest implements CommandExecutor {
     private boolean sorted(ItemStack[] items) {
         for (int i = 1; i < items.length; i++) {
             int a = items[i].getType().ordinal();
-            int b = items[i-1].getType().ordinal();
+            int b = items[i - 1].getType().ordinal();
 
             if (a < b) {
                 return false;
