@@ -1,8 +1,18 @@
 package com.chrisstar123.chestsorter.command;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+
 import org.bukkit.Material;
+import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
+import org.bukkit.block.EnderChest;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,16 +21,14 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.chrisstar123.chestsorter.ChestSorter;
 import com.chrisstar123.chestsorter.pluginsupport.Factions;
 import com.chrisstar123.chestsorter.pluginsupport.LWC;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import de.jeffclan.JeffChestSort.JeffChestSortOrganizer;
 
 public class SortChest implements CommandExecutor {
+    ChestSorter cs = ChestSorter.cs;
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
@@ -34,7 +42,7 @@ public class SortChest implements CommandExecutor {
         filter.add(Material.CHEST);
         Block target = player.getTargetBlock(null, 5);
 
-        if (target.getType() != Material.CHEST) {
+        if (!isChest(target)) {
             return true;
         }
 
@@ -49,38 +57,62 @@ public class SortChest implements CommandExecutor {
         }
 
         // Get chest contents
-        Chest chest = (Chest) target.getState();
-        Inventory chestInv = chest.getInventory();
-        ItemStack[] items;
-        if (chestInv instanceof DoubleChestInventory) {
-            items = ((DoubleChestInventory) chestInv).getHolder().getInventory().getContents();
-        } else {
-            items = chestInv.getContents();
+        BlockState state = target.getState();
+        Inventory chestInv = null;
+
+        if (state instanceof Barrel) {
+            Barrel barrel = (Barrel) target.getState();
+            chestInv = barrel.getInventory();
+        } else if (state instanceof Chest) {
+            Chest chest = (Chest) target.getState();
+            chestInv = chest.getInventory();
+        } else if (state instanceof EnderChest) {
+            chestInv = player.getEnderChest();
+        } else if (state instanceof ShulkerBox) {
+            ShulkerBox shulker = (ShulkerBox) target.getState();
+            chestInv = shulker.getInventory();
         }
 
-        // Filter out null itemstacks
-        List<ItemStack> itemsList = new ArrayList<>(Arrays.asList(items));
-        itemsList.removeAll(Collections.singleton(null));
-        items = itemsList.toArray(new ItemStack[itemsList.size()]);
+        if (chestInv == null) {
+            return true;
+        }
 
-        // Stack items together
-        items = stackItems(items);
-
-        // Sort items and put back in chest
-        sortItems(items);
-        items = removeAir(items);
-
-        if (chestInv instanceof DoubleChestInventory) {
-            // Split list in parts no longer than 27
-            ItemStack[] chestA = Arrays.copyOfRange(items, 0, 27);
-            ItemStack[] chestB = items.length > 26 ? Arrays.copyOfRange(items, 27, 54) : new ItemStack[] {};
-
-            DoubleChestInventory dChest = (DoubleChestInventory) chestInv;
-            dChest.getLeftSide().setContents(chestA);
-            dChest.getRightSide().setContents(chestB);
+        // Sort contents
+        if (cs.getConfig().getBoolean("use.jeffsort.method", true)) {
+            JeffChestSortOrganizer organizer = cs.organizer;
+            organizer.sortInventory(chestInv);
         } else {
-            // just set the contents
-            chestInv.setContents(items);
+            ItemStack[] items;
+            if (chestInv instanceof DoubleChestInventory) {
+                items = ((DoubleChestInventory) chestInv).getHolder().getInventory().getContents();
+            } else {
+                items = chestInv.getContents();
+            }
+
+            // Filter out null itemstacks
+            List<ItemStack> itemsList = new ArrayList<>(Arrays.asList(items));
+            itemsList.removeAll(Collections.singleton(null));
+            items = itemsList.toArray(new ItemStack[itemsList.size()]);
+
+            // Stack items together
+            items = stackItems(items);
+
+            // Sort items and put back in chest
+            sortItems(items);
+            items = removeAir(items);
+
+            if (chestInv instanceof DoubleChestInventory) {
+                // Split list in parts no longer than 27
+                ItemStack[] chestA = Arrays.copyOfRange(items, 0, 27);
+                ItemStack[] chestB = items.length > 26 ? Arrays.copyOfRange(items, 27, 54) : new ItemStack[] {};
+
+                DoubleChestInventory dChest = (DoubleChestInventory) chestInv;
+                dChest.getLeftSide().setContents(chestA);
+                dChest.getRightSide().setContents(chestB);
+            } else {
+                // just set the contents
+                chestInv.setContents(items);
+            }
         }
 
         return true;
@@ -146,5 +178,22 @@ public class SortChest implements CommandExecutor {
         itemsList.removeAll(toRemove);
 
         return itemsList.toArray(new ItemStack[itemsList.size()]);
+    }
+
+    private boolean isChest(Block block) {
+        String blockName = block.getType().toString();
+
+        if (blockName.endsWith("SHULKER_BOX"))
+            return true;
+
+        switch (blockName) {
+        case "BARREL":
+        case "CHEST":
+        case "ENDER_CHEST":
+            return true;
+
+        default:
+            return false;
+        }
     }
 }

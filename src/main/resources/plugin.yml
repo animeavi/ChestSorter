@@ -1,8 +1,8 @@
 name: ChestSorter
-version: 1.3
+version: 1.4
 author: chrisstar123
 main: com.chrisstar123.chestsorter.ChestSorter
-api-version: 1.13
+api-version: 1.14
 softdepend: [Factions, LWC]
 
 commands:
