@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
@@ -43,16 +44,19 @@ public class SortChest implements CommandExecutor {
         Block target = player.getTargetBlock(null, 5);
 
         if (!isChest(target)) {
+            player.sendMessage(ChatColor.RED + "Target is not a chest!");
             return true;
         }
 
         // Check if player has Factions permissions to modify this chest
         if (Factions.getEnabled() && !Factions.canModifyChest(player, target)) {
+            player.sendMessage(ChatColor.RED + "Couldn sort chest, it is protected by Factions!");
             return true;
         }
 
         // Check if chest has a LWC lock that does not belong to current player
         if (LWC.getEnabled() && !LWC.canModifyChest(player, target)) {
+            player.sendMessage(ChatColor.RED + "Couldn sort chest, it is protected by LWC!");
             return true;
         }
 
@@ -115,6 +119,7 @@ public class SortChest implements CommandExecutor {
             }
         }
 
+        player.sendMessage(ChatColor.GREEN + "The chest was sorted successfully!");
         return true;
     }
 
