@@ -1,3 +1,4 @@
 factions.integration: false
 lwc.integration: false
 use.jeffsort.method: true
+update.jeffsort.files.startup: true

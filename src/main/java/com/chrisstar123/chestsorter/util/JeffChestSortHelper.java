@@ -11,8 +11,11 @@ import com.chrisstar123.chestsorter.ChestSorter;
 import de.jeffclan.utils.Utils;
 
 public class JeffChestSortHelper {
+    private static ChestSorter cs;
+
     // Saves default category files, when enabled in the config
     public static void saveDefaultCategories() {
+        cs = ChestSorter.cs;
         createDirectories();
 
         // Isn't there a smarter way to find all the 9** files in the .jar?
@@ -20,10 +23,18 @@ public class JeffChestSortHelper {
                 "910-valuables", "920-armor-and-arrows", "930-brewing", "950-redstone", "960-wood", "970-stone",
                 "980-plants", "981-corals", "_ReadMe - Category files" };
 
-        File catDir = new File(
-                ChestSorter.cs.getDataFolder().getAbsolutePath() + File.separator + "categories" + File.separator);
+        File catDir = new File(cs.getDataFolder().getAbsolutePath() + File.separator + "categories" + File.separator);
 
-        if (catDir != null && catDir.isDirectory() && catDir.listFiles().length > 0) {
+        int catFiles = 0;
+        if (catDir != null && catDir.isDirectory()) {
+            catFiles = catDir.listFiles().length;
+        }
+
+        if (!cs.getConfig().getBoolean("update.jeffsort.files.startup", true) && (catFiles > 0)) {
+            return;
+        }
+
+        if (catFiles > 0) {
             // Delete all files starting with 9..
             for (File file : catDir.listFiles(new FilenameFilter() {
                 public boolean accept(File directory, String fileName) {
@@ -51,8 +62,8 @@ public class JeffChestSortHelper {
                 }
                 if (delete) {
                     file.delete();
-                    // ChestSorter.cs.getLogger().warning("Deleting deprecated default category file
-                    // " + file.getName());
+                    // cs.getLogger().warning("Deleting deprecated default category file" +
+                    // file.getName());
                 }
 
             }
@@ -64,10 +75,9 @@ public class JeffChestSortHelper {
             File fileDefault;
 
             try {
-                InputStream in = ChestSorter.cs.getClass()
-                        .getResourceAsStream("/categories/" + category + ".default.txt");
+                InputStream in = cs.getClass().getResourceAsStream("/categories/" + category + ".default.txt");
 
-                fileDefault = new File(ChestSorter.cs.getDataFolder().getAbsolutePath() + File.separator + "categories"
+                fileDefault = new File(cs.getDataFolder().getAbsolutePath() + File.separator + "categories"
                         + File.separator + category + ".txt");
                 fopDefault = new FileOutputStream(fileDefault);
 
@@ -99,7 +109,7 @@ public class JeffChestSortHelper {
         // Create a categories folder that contains text files. ChestSort includes
         // default category files,
         // but you can also create your own
-        File categoriesFolder = new File(ChestSorter.cs.getDataFolder().getPath() + File.separator + "categories");
+        File categoriesFolder = new File(cs.getDataFolder().getPath() + File.separator + "categories");
         if (!categoriesFolder.getAbsoluteFile().exists()) {
             categoriesFolder.mkdir();
         }
